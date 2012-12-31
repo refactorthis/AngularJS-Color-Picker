@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>AngularJS - Color Picker</title>
+  
+  <script src='http://code.jquery.com/jquery-1.8.2.js'></script>   
+  <script src="resources/AngularJS/angular.min.js"></script>
+  <script src="resources/jQuery_ColorPicker/jquery.colorPicker.min.js"></script>
+  
+  <link rel="stylesheet" href="resources/jQuery_ColorPicker/colorPicker.css" type="text/css" media="screen" charset="utf-8" />  
+  
+  <script type='text/javascript'>
+	
+	var app = angular.module('myApp', []);
+	
+	app.directive('colorPicker', function() {
+	  return {
+	    scope: {
+	      color: '=colorPicker'
+	    },
+	    link: function(scope, element, attrs) {
+	      element.colorPicker({
+	        // initialize the color to the color on the scope
+	        pickerDefault: scope.color,
+	        // update the scope whenever we pick a new color
+	        onColorChange: function(id, newValue) {
+	          scope.$apply(function() {
+	            scope.color = newValue;
+	          });
+	          // there is a currently a bug in Angular where you have to
+	          // call $apply() twice if you're setting an attribute on
+	          // an isolate scope property bound with =
+	          // (in our case, '=colorPicker')
+	          //
+	          // See https://github.com/angular/angular.js/issues/1276
+	          scope.$apply();
+	        }
+	      });
+	
+	      // update the color picker whenever the value on the scope changes
+	      scope.$watch('color', function(value) {
+	        element.val(value);
+	        element.change();                
+	      });
+	    }
+	  }
+	});
+	
+	app.controller('MainController', function($scope) {
+	  $scope.project = {
+	    color: "#ff0000"
+	  };
+	
+	  $scope.randomColor = function() {
+	    var red   = Math.floor(Math.random() * 255);
+	    var green = Math.floor(Math.random() * 255);
+	    var blue  = Math.floor(Math.random() * 255);
+	    return "rgb(" + red + "," + green + "," + blue + ")";
+	  };
+	});
+  </script>
+
+</head>
+
+<body>
+  <div ng-app="myApp" ng-controller='MainController'>
+	  <span style="color: {{project.color}}">My Color Picker</span>
+	  <input type="text" ng-model="project.color">
+	  <button ng-click="project.color='#000000'">Black</button>
+	  <button ng-click="project.color='#00ff00'">Green</button>
+	  <button ng-click="project.color='#ff00ff'">Purple</button>
+	  <button ng-click="project.color=randomColor()">Random</button>
+	  <input color-picker="project.color">
+  </div> 
+</body>
+</html>
